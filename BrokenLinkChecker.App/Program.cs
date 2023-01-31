@@ -1,13 +1,23 @@
-﻿using System;
+﻿using System.Threading.Tasks;
+
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 
 namespace BrokenLinkChecker.App;
 
 internal static class Program
 {
-    static void Main(string[] args)
+    static async Task Main(string[] args)
     {
-        Console.WriteLine("Hello, World!");
+        using var host = Host.CreateDefaultBuilder(args)
+            .ConfigureServices((services) =>
+            {
+                services.AddSingleton<Runner>();
+                services.AddTransient<LinkCollector>();
+                services.AddTransient<LinkChecker>();
+            })
+            .Build();
 
-        new App().
+        await host.Services.GetService<Runner>().RunAsync("https://quickcoder.org");
     }
 }
