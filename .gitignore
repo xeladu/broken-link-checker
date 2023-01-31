@@ -2,6 +2,6 @@
 # This .gitignore file was automatically created by Microsoft(R) Visual Studio.
 ################################################################################
 
-/.vs/Broken Link Checker
-/bin/Debug/net7.0
-/obj
+/.vs
+/BrokenLinkChecker.App/bin/Debug/net7.0
+/BrokenLinkChecker.App/obj
