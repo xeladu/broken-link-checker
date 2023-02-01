@@ -4,51 +4,67 @@ using System.Linq;
 using System.Threading.Tasks;
 
 using BrokenLinkChecker.App.Models;
+using BrokenLinkChecker.App.ProgressReporting;
 
 using HtmlAgilityPack;
 
+using Microsoft.Extensions.DependencyInjection;
+
 namespace BrokenLinkChecker.App;
-internal class LinkCollector
+
+internal class LinkCollector : ProgressReporter
 {
-    private List<string> _processedTargets = new List<string>();
-    private string? _baseUrl;
+    private readonly AppSettings _appSettings;
 
     public List<Link> Links { get; } = new List<Link>();
 
-    public async Task CollectAsync(string baseUrl)
+    public LinkCollector(IServiceProvider services)
     {
-        _baseUrl = baseUrl;
+        _appSettings = services.GetService<AppSettings>() ?? throw new ArgumentNullException(nameof(_appSettings));
+    }
 
-        var initialLinks = (await GrabLinksFromUrl(_baseUrl)).Distinct();
-        Links.AddRange(initialLinks.Where(link => !_processedTargets.Contains(link.Target)));
+    public async Task CollectAsync()
+    {
+        Links.Add(new Link { IsExternal = false, Target = _appSettings.BaseUrl });
 
         var linkCount = Links.Count;
         for (var i = 0; i < linkCount; i++)
         {
-            Console.WriteLine($"{i}/{linkCount - 1}");
+            var currentLink = Links[i];
 
-            var link = Links[i];
-
-            // don't search twice
-            if (link.Processed)
+            // only index internal pages
+            if (currentLink.IsExternal)
                 continue;
 
-            // don't search duplicate targets
-            if (_processedTargets.Contains(link.Target))
-                continue;
+            ReportProgressVerbose($"Processing {currentLink.Target}...");
 
-            Console.WriteLine($"Processing {link.Target}...");
-            _processedTargets.Add(link.Target);
-
-            foreach (var newLink in await GrabLinksFromUrl(_baseUrl))
+            var newLinksFound = 0;
+            foreach (var newLink in await GrabLinksFromUrl(currentLink.Target))
             {
-                if (!Links.Contains(newLink) && !_processedTargets.Contains(newLink.Target))
+                if (!Links.Contains(newLink))
                 {
                     Links.Add(newLink);
-                    linkCount++;
+                    newLinksFound++;
+
+                    // By not increasing the counter, we can prevent additional links from being followed.
+                    // Only the link of the base url are used.
+                    if (_appSettings.FollowInternalLinks)
+                    {
+                        linkCount++;
+                    }
+                }
+                else
+                {
+                    var existingLink = Links.SingleOrDefault(x => x.Equals(newLink));
+                    if (existingLink != null && !existingLink.Sources.Contains(currentLink.Target))
+                        existingLink.Sources.Add(currentLink.Target);
                 }
             }
+
+            ReportProgressVerbose($"{newLinksFound} new links found");
         }
+
+        ReportProgress($"{Links.Count} unique links found");
     }
 
     private async Task<IEnumerable<Link>> GrabLinksFromUrl(string url)
@@ -65,8 +81,8 @@ internal class LinkCollector
                 {
                     // remove trailing slashes
                     Target = link.EndsWith("/") ? link.Substring(0, link.Length - 1) : link,
-                    IsExternal = !link.StartsWith(_baseUrl),
-                    Processed = false,
+                    Sources = new List<string> { url },
+                    IsExternal = !link.StartsWith(_appSettings.BaseUrl),
                     Status = null
                 });
         }

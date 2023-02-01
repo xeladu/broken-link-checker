@@ -1,12 +1,14 @@
-﻿namespace BrokenLinkChecker.App.Models;
+﻿using System.Collections.Generic;
+
+namespace BrokenLinkChecker.App.Models;
 
 internal class Link
 {
+    public List<string> Sources { get; set; } = new List<string>();
+
     public required string Target { get; init; }
 
     public required bool IsExternal { get; init; }
-
-    public bool Processed { get; set; }
 
     public LinkCheckResult? Status { get; set; }
 
@@ -22,6 +24,6 @@ internal class Link
 
     public override string ToString()
     {
-        return Target + (IsExternal ? " (ext)" : "");
+        return Target + (IsExternal ? " (ext)" : "") + (Status != null ? "\r\n" + Status : "");
     }
 }

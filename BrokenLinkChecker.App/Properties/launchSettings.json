@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "BrokenLinkChecker.App": {
+      "commandName": "Project",
+      "commandLineArgs": "https://quickcoder.org/notion-sponsor --follow-internal-links false"
+    }
+  }
+}

@@ -1,34 +1,59 @@
-﻿using System.Net;
+﻿using System;
+using System.Net;
+using System.Net.Http;
 using System.Threading.Tasks;
 
 using BrokenLinkChecker.App.Models;
+using BrokenLinkChecker.App.ProgressReporting;
 
 namespace BrokenLinkChecker.App;
-internal class LinkChecker
+
+internal class LinkChecker : ProgressReporter
 {
     public async Task CheckAsync(Link link)
     {
-        var request = (HttpWebRequest)WebRequest.Create(link.Target);
-        request.Timeout = 15000;
-        request.Method = "HEAD";
+        ReportProgressVerbose($"Checking link {link}...");
+        
+        var client = new HttpClient
+        {
+            Timeout = TimeSpan.FromSeconds(15)
+        };
+
+        var message = new HttpRequestMessage
+        {
+            Method = HttpMethod.Get,
+            RequestUri = new Uri(link.Target)
+        };
+
         try
         {
-            using (var response = (HttpWebResponse) await request.GetResponseAsync())
+            using (var response = await client.SendAsync(message))
             {
                 link.Status = new LinkCheckResult
                 {
                     Result = response.StatusCode == HttpStatusCode.OK ? CheckResult.Online : CheckResult.Broken,
-                    Error = response.StatusCode == HttpStatusCode.OK ? string.Empty : response.StatusDescription
+                    StatusCode = response.StatusCode,
+                    Error = response.ReasonPhrase ?? ""
                 };
             }
         }
-        catch (WebException ex)
+        catch (HttpRequestException ex)
         {
             link.Status = new LinkCheckResult
             {
                 Result = CheckResult.Broken,
+                StatusCode = ex.StatusCode ?? 0,
                 Error = ex.Message
             };
+        }
+
+        if (link.Status?.Result == CheckResult.Broken)
+        {
+            ReportProgress($"{link}");
+        }
+        else
+        {
+            ReportProgressVerbose($"{link}");
         }
     }
 }
