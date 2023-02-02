@@ -24,6 +24,6 @@ internal class Link
 
     public override string ToString()
     {
-        return Target + (IsExternal ? " (ext)" : "") + (Status != null ? "\r\n" + Status : "");
+        return Target + (IsExternal ? " (ext)" : "") + (Status != null ? " " + Status : "");
     }
 }

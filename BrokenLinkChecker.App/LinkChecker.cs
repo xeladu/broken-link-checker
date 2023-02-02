@@ -12,8 +12,6 @@ internal class LinkChecker : ProgressReporter
 {
     public async Task CheckAsync(Link link)
     {
-        ReportProgressVerbose($"Checking link {link}...");
-        
         var client = new HttpClient
         {
             Timeout = TimeSpan.FromSeconds(15)

@@ -76,11 +76,31 @@ internal class Runner : ProgressReporter
 
             """);
 
-        foreach (var link in _linkCollector.Links.Where(x => x.Status?.Result == CheckResult.Broken))
+        var brokenLinks = _linkCollector.Links.Where(x => x.Status?.Result == CheckResult.Broken).OrderBy(x => x.Target).ToList();
+        for (var i = 1; i <= brokenLinks.Count; i++)
         {
-            ReportProgress($"{link}");
-            ReportProgress($"Sources: {link.Sources.Count}");
-            ReportProgress($"{link.Sources.Aggregate((x, y) => x + "\r\n" + y)}\r\n");
+            var link = brokenLinks[i - 1];
+            ReportProgress($"{i - 1}: {link}");
+            ReportProgress($"  Sources: {link.Sources.Count}");
+            ReportProgress($"  {link.Sources.Aggregate((x, y) => x + "\r\n  " + y)}\r\n");
+        }
+
+        ReportProgressVerbose(
+        """
+
+            -------------------------
+            --- List of all links ---
+            -------------------------
+
+            """);
+
+        var allLinks = _linkCollector.Links.OrderBy(x => x.Target).ToList();
+        for (var i = 1; i <= allLinks.Count; i++)
+        {
+            var link = allLinks[i - 1];
+            ReportProgressVerbose($"{i - 1}: {link}");
+            ReportProgressVerbose($"  Sources: {link.Sources.Count}");
+            ReportProgressVerbose($"  {link.Sources.Aggregate((x, y) => x + "\r\n  " + y)}\r\n");
         }
     }
 
