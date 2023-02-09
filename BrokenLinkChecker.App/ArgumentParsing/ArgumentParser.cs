@@ -1,14 +1,14 @@
 ﻿using BrokenLinkChecker.App.Models;
 
 namespace BrokenLinkChecker.App.ArgumentParsing;
-public class ArgumentParser
+public static class ArgumentParser
 {
     private const string ARG_FOLLOW_INTERNAL_LINKS = "--follow-internal-links";
     private const string ARG_OUTPUT = "--output";
     private const string ARG_VERBOSE = "--verbose";
     private const string ARG_VERBOSE_SHORT = "-v";
 
-    public AppSettings Parse(string[] args)
+    public static AppSettings Parse(string[] args)
     {
         var baseUrl = "";
         var followInternalLinks = true;

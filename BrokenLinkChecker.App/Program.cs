@@ -21,7 +21,7 @@ internal static class Program
                 """);
         try
         {
-            var settings = new ArgumentParser().Parse(args);
+            var settings = ArgumentParser.Parse(args);
 
             using var host = Host.CreateDefaultBuilder(args)
                 .ConfigureServices((services) =>
