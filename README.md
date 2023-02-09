@@ -12,4 +12,4 @@ The tool parses the given URL for links and collects them. In the next step, it 
 
 # Known issues
 - Some links reject an HTTP HEAD request
-- Output argument is not implemented yet
+- Sometimes websites respond with error codes like 403 (forbidden), 503 (temporarily unavailable), or 504 (gateway timeout) while a browser access works
