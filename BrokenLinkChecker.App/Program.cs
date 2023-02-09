@@ -27,6 +27,7 @@ internal static class Program
                 .ConfigureServices((services) =>
                 {
                     services.AddSingleton<Runner>();
+                    services.AddSingleton<FileWriter>();
                     services.AddTransient<LinkCollector>();
                     services.AddTransient<LinkChecker>();
                     services.AddSingleton(settings);
@@ -36,6 +37,13 @@ internal static class Program
             var runner = host.Services.GetService<Runner>();
             if (runner != null)
                 await runner.RunAsync();
+
+            if (!string.IsNullOrEmpty(settings.OutputPath))
+            {
+                var fileWriter = host.Services.GetService<FileWriter>();
+                if (fileWriter != null)
+                    await fileWriter.WriteToFileAsync(settings.OutputPath);
+            }
         }
         catch (ArgumentParseException e)
         {

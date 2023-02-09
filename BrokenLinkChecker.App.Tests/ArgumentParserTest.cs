@@ -30,11 +30,10 @@ public class ArgumentParserTest
         string expectedOutputValue,
         bool expectedVerboseValue)
     {
-        var parser = new ArgumentParser();
 
         try
         {
-            var settings = parser.Parse(input);
+            var settings = ArgumentParser.Parse(input);
             Assert.AreEqual(expectedBaseUrlValue, settings.BaseUrl);
             Assert.AreEqual(expectedFollowInternalLinksValue, settings.FollowInternalLinks);
             Assert.AreEqual(expectedOutputValue, settings.OutputPath);

@@ -15,17 +15,20 @@ namespace BrokenLinkChecker.App;
 internal class LinkCollector : ProgressReporter
 {
     private readonly AppSettings _appSettings;
+    private readonly string _host;
 
     public List<Link> Links { get; } = new List<Link>();
 
     public LinkCollector(IServiceProvider services)
     {
         _appSettings = services.GetService<AppSettings>() ?? throw new ArgumentNullException(nameof(_appSettings));
+        _host = new Uri(_appSettings.BaseUrl).Host;
     }
 
     public async Task CollectAsync()
     {
-        Links.Add(new Link { IsExternal = false, Target = _appSettings.BaseUrl });
+        var initialUri = _appSettings.BaseUrl.EndsWith("/") ? _appSettings.BaseUrl.Substring(0, _appSettings.BaseUrl.Length - 1) : _appSettings.BaseUrl;
+        Links.Add(new Link { IsExternal = false, Target = initialUri, Sources = new List<string> { initialUri } });
 
         var linkCount = Links.Count;
         for (var i = 0; i < linkCount; i++)
@@ -82,7 +85,7 @@ internal class LinkCollector : ProgressReporter
                     // remove trailing slashes
                     Target = link.EndsWith("/") ? link.Substring(0, link.Length - 1) : link,
                     Sources = new List<string> { url },
-                    IsExternal = !link.StartsWith(_appSettings.BaseUrl),
+                    IsExternal = !new Uri(link).Host.Equals(_host),
                     Status = null
                 });
         }

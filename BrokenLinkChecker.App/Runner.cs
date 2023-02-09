@@ -14,12 +14,14 @@ internal class Runner : ProgressReporter
     private readonly LinkCollector _linkCollector;
     private readonly LinkChecker _linkChecker;
     private readonly AppSettings _appSettings;
+    private readonly FileWriter _fileWriter;
 
     public Runner(IServiceProvider services)
     {
         _linkCollector = services.GetService<LinkCollector>() ?? throw new ArgumentNullException(nameof(_linkCollector));
         _linkChecker = services.GetService<LinkChecker>() ?? throw new ArgumentNullException(nameof(_linkChecker));
         _appSettings = services.GetService<AppSettings>() ?? throw new ArgumentNullException(nameof(_appSettings));
+        _fileWriter = services.GetService<FileWriter>() ?? throw new ArgumentNullException(nameof(_fileWriter));
     }
 
     public async Task RunAsync()
@@ -35,10 +37,7 @@ internal class Runner : ProgressReporter
 
         ReportProgress($"Checking availability of {_linkCollector.Links.Count} links ...");
 
-        await Parallel.ForEachAsync(_linkCollector.Links, async (link, _) =>
-        {
-            await _linkChecker.CheckAsync(link);
-        });
+        await Parallel.ForEachAsync(_linkCollector.Links, async (link, _) => await _linkChecker.CheckAsync(link));
 
         ReportProgressVerbose($"Availability check completed");
 
@@ -106,17 +105,46 @@ internal class Runner : ProgressReporter
 
     private void SetupProgressReporting()
     {
-        if (_appSettings.DetailedLogMessages)
+        if (_appSettings.DetailedLogMessages && !string.IsNullOrEmpty(_appSettings.OutputPath))
         {
-            _linkCollector.OnReportProgressVerbose += (s, e) => Console.WriteLine(e.Message);
-            _linkChecker.OnReportProgressVerbose += (s, e) => Console.WriteLine(e.Message);
-            OnReportProgressVerbose += (s, e) => Console.WriteLine(e.Message);
+            _linkCollector.OnReportProgressVerbose += WriteToConsoleAndOutput;
+            _linkChecker.OnReportProgressVerbose += WriteToConsoleAndOutput;
+            OnReportProgressVerbose += WriteToConsoleAndOutput;
+        }
+        else if (_appSettings.DetailedLogMessages)
+        {
+            _linkCollector.OnReportProgressVerbose += WriteToConsole;
+            _linkChecker.OnReportProgressVerbose += WriteToConsole;
+            OnReportProgressVerbose += WriteToConsole;
+        }
+        else if (!string.IsNullOrEmpty(_appSettings.OutputPath))
+        {
+            _linkCollector.OnReportProgress += WriteToConsoleAndOutput;
+            _linkChecker.OnReportProgress += WriteToConsoleAndOutput;
+            OnReportProgress += WriteToConsoleAndOutput;
         }
         else
         {
-            _linkCollector.OnReportProgress += (s, e) => Console.WriteLine(e.Message);
-            _linkChecker.OnReportProgress += (s, e) => Console.WriteLine(e.Message);
-            OnReportProgress += (s, e) => Console.WriteLine(e.Message);
+            _linkCollector.OnReportProgress += WriteToConsole;
+            _linkChecker.OnReportProgress += WriteToConsole;
+            OnReportProgress += WriteToConsole;
         }
+    }
+
+    private void WriteToConsole(object? sender, ProgressEventArgs? e)
+    {
+        if (e == null)
+            return;
+
+        Console.WriteLine(e.Message);
+    }
+
+    private void WriteToConsoleAndOutput(object? sender, ProgressEventArgs? e)
+    {
+        if (e == null)
+            return;
+
+        Console.WriteLine(e.Message);
+        _fileWriter.Log(e.Message);
     }
 }
