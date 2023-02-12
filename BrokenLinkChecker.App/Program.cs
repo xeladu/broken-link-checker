@@ -52,16 +52,16 @@ internal static class Program
                 usage: blc <url> [--verbose | -v] [--follow-internal-links <true|false>] [--output <path>]
 
                     url        
-                    A valid http web url to check
+                    A valid http(s) web url to check
 
                     --verbose | -v
-                    Outputs detailled program information
+                    Outputs detailed program information
 
                     --follow-internal-links
-                    Indicates if sublinks of the url should be checked, too (default: true)
+                    Indicates if sublinks of the url with the same host should be checked, too (default: true)
 
                     --output
-                    Specify a folder that will contains the program's output in a text file blc.txt
+                    Specify a folder that will contain the program's output in a text file blc.txt
 
                 """);
 

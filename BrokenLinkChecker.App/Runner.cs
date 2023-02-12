@@ -66,6 +66,26 @@ internal class Runner : ProgressReporter
         ReportProgress($"Links online:  {onlineLinkCount,4}");
         ReportProgress($"Links broken:  {brokenLinkCount,4}");
 
+        ReportBrokenLinks();
+        ReportAllLinks();
+
+        if (brokenLinkCount == 0)
+        {
+            ReportProgress(
+            """
+
+            ✅ No issues found!
+
+            """);
+        }
+    }
+
+    private void ReportBrokenLinks()
+    {
+        var brokenLinks = _linkCollector.Links.Where(x => x.Status?.Result == CheckResult.Broken).OrderBy(x => x.Target).ToList();
+        if (brokenLinks.Count == 0)
+            return;
+
         ReportProgress(
             """
 
@@ -75,7 +95,6 @@ internal class Runner : ProgressReporter
 
             """);
 
-        var brokenLinks = _linkCollector.Links.Where(x => x.Status?.Result == CheckResult.Broken).OrderBy(x => x.Target).ToList();
         for (var i = 1; i <= brokenLinks.Count; i++)
         {
             var link = brokenLinks[i - 1];
@@ -83,9 +102,16 @@ internal class Runner : ProgressReporter
             ReportProgress($"  Sources: {link.Sources.Count}");
             ReportProgress($"  {link.Sources.Aggregate((x, y) => x + "\r\n  " + y)}\r\n");
         }
+    }
+
+    private void ReportAllLinks()
+    {
+        var allLinks = _linkCollector.Links.OrderBy(x => x.Target).ToList();
+        if (allLinks.Count == 0)
+            return;
 
         ReportProgressVerbose(
-        """
+            """
 
             -------------------------
             --- List of all links ---
@@ -93,7 +119,6 @@ internal class Runner : ProgressReporter
 
             """);
 
-        var allLinks = _linkCollector.Links.OrderBy(x => x.Target).ToList();
         for (var i = 1; i <= allLinks.Count; i++)
         {
             var link = allLinks[i - 1];
