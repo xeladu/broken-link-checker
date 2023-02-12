@@ -10,6 +10,6 @@ The tool parses the given URL for links and collects them. In the next step, it 
 # Examples
 ![image](https://user-images.githubusercontent.com/97696030/216459592-4ead468e-302d-4220-9e3c-6695f3d433fc.png)
 
-# Known issues
-- Some links reject an HTTP HEAD request
-- Sometimes websites respond with error codes like 403 (forbidden), 503 (temporarily unavailable), or 504 (gateway timeout) while a browser access works
+# Limitations
+- Some websites try to prevent requests from anything than a browser
+- A broken doesn't necessarily mean that the website is down. When in doubt, double-check with a browser
