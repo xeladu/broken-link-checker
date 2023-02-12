@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 
 using BrokenLinkChecker.App.ArgumentParsing;
+using BrokenLinkChecker.App.Models;
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -30,6 +31,7 @@ internal static class Program
                     services.AddSingleton<FileWriter>();
                     services.AddTransient<LinkCollector>();
                     services.AddTransient<LinkChecker>();
+                    services.AddSingleton<Result>();
                     services.AddSingleton(settings);
                 })
                 .Build();
@@ -40,16 +42,32 @@ internal static class Program
 
             if (!string.IsNullOrEmpty(settings.OutputPath))
             {
+                if (settings.Json)
+                {
+
+                }
+
                 var fileWriter = host.Services.GetService<FileWriter>();
                 if (fileWriter != null)
-                    await fileWriter.WriteToFileAsync(settings.OutputPath);
+                {
+                    if (settings.Json)
+                    {
+                        var result = host.Services.GetService<Result>();
+                        if (result != null)
+                            await fileWriter.WriteJsonToFileAsync(settings.OutputPath, result);
+                    }
+                    else
+                    {
+                        await fileWriter.WriteToFileAsync(settings.OutputPath);
+                    }
+                }
             }
         }
         catch (ArgumentParseException e)
         {
             Console.WriteLine(
                 """
-                usage: blc <url> [--verbose | -v] [--follow-internal-links <true|false>] [--output <path>]
+                usage: blc <url> [--verbose | -v] [--no-follow-internal-links] [--output <path>] [--json]
 
                     url        
                     A valid http(s) web url to check
@@ -57,11 +75,14 @@ internal static class Program
                     --verbose | -v
                     Outputs detailed program information
 
-                    --follow-internal-links
-                    Indicates if sublinks of the url with the same host should be checked, too (default: true)
+                    --no-follow-internal-links
+                    Indicates that sublinks of the url with the same host should not be checked
 
                     --output
                     Specify a folder that will contain the program's output in a text file blc.txt
+
+                    --json
+                    Program output will be stored in JSON format (requires --output)
 
                 """);
 

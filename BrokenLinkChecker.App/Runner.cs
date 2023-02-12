@@ -15,6 +15,7 @@ internal class Runner : ProgressReporter
     private readonly LinkChecker _linkChecker;
     private readonly AppSettings _appSettings;
     private readonly FileWriter _fileWriter;
+    private readonly Result _result;
 
     public Runner(IServiceProvider services)
     {
@@ -22,6 +23,7 @@ internal class Runner : ProgressReporter
         _linkChecker = services.GetService<LinkChecker>() ?? throw new ArgumentNullException(nameof(_linkChecker));
         _appSettings = services.GetService<AppSettings>() ?? throw new ArgumentNullException(nameof(_appSettings));
         _fileWriter = services.GetService<FileWriter>() ?? throw new ArgumentNullException(nameof(_fileWriter));
+        _result = services.GetService<Result>() ?? throw new ArgumentNullException(nameof(_result));
     }
 
     public async Task RunAsync()
@@ -38,6 +40,10 @@ internal class Runner : ProgressReporter
         ReportProgress($"Checking availability of {_linkCollector.Links.Count} links ...");
 
         await Parallel.ForEachAsync(_linkCollector.Links, async (link, _) => await _linkChecker.CheckAsync(link));
+
+        _result.TotalLinkCount = _linkCollector.Links.Count();
+        _result.BrokenLinkCount = _linkCollector.Links.Count(x => x.Status?.Result == CheckResult.Broken);
+        _result.BrokenLinks = _linkCollector.Links.Where(x => x.Status?.Result == CheckResult.Broken);
 
         ReportProgressVerbose($"Availability check completed");
 

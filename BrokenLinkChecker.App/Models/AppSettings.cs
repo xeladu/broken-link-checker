@@ -6,12 +6,14 @@ public class AppSettings
     public bool FollowInternalLinks { get; }
     public string OutputPath { get; }
     public bool DetailedLogMessages { get; }
+    public bool Json { get; }
 
-    public AppSettings(string baseUrl, bool followInternalLinks, string outputPath, bool detailedLogMessages)
+    public AppSettings(string baseUrl, bool followInternalLinks, string outputPath, bool detailedLogMessages, bool json)
     {
         BaseUrl = baseUrl;
         FollowInternalLinks = followInternalLinks;
         OutputPath = outputPath;
         DetailedLogMessages = detailedLogMessages;
+        Json = json;
     }
 }

@@ -2,6 +2,10 @@
 using System.Text;
 using System.Threading.Tasks;
 
+using BrokenLinkChecker.App.Models;
+
+using Newtonsoft.Json;
+
 namespace BrokenLinkChecker.App;
 internal class FileWriter
 {
@@ -15,5 +19,10 @@ internal class FileWriter
     public async Task WriteToFileAsync(string filePath)
     {
         await File.WriteAllTextAsync(Path.Combine(filePath, "blc.txt"), _logs.ToString());
+    }
+
+    public async Task WriteJsonToFileAsync(string filePath, Result result)
+    {
+        await File.WriteAllTextAsync(Path.Combine(filePath, "blc.json"), JsonConvert.SerializeObject(result));
     }
 }

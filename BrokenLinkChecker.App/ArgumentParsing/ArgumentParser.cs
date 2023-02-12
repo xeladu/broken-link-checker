@@ -3,17 +3,19 @@
 namespace BrokenLinkChecker.App.ArgumentParsing;
 public static class ArgumentParser
 {
-    private const string ARG_FOLLOW_INTERNAL_LINKS = "--follow-internal-links";
+    private const string ARG_NO_FOLLOW_INTERNAL_LINKS = "--no-follow-internal-links";
     private const string ARG_OUTPUT = "--output";
     private const string ARG_VERBOSE = "--verbose";
     private const string ARG_VERBOSE_SHORT = "-v";
+    private const string ARG_JSON = "--json";
 
     public static AppSettings Parse(string[] args)
     {
         var baseUrl = "";
         var followInternalLinks = true;
         var outputPath = "";
-        var detailledLogMessages = false;
+        var detailedLogMessages = false;
+        var json = false;
 
         if (args.Length == 0)
             throw new ArgumentParseException("Provide a website to check!");
@@ -26,22 +28,17 @@ public static class ArgumentParser
             // first argument is the website
             if (i == 0)
             {
+                if (arg.StartsWith("-"))
+                    throw new ArgumentParseException("The first argument must be the target website!");
+
                 baseUrl = arg;
                 continue;
             }
 
-            if (arg.Equals(ARG_FOLLOW_INTERNAL_LINKS))
+            if (arg.Equals(ARG_NO_FOLLOW_INTERNAL_LINKS))
             {
-                if (bool.TryParse(val, out var res))
-                {
-                    followInternalLinks = res;
-                    i++;
-                    continue;
-                }
-                else
-                {
-                    throw new ArgumentParseException($"{val} is not a valid boolean property!");
-                }
+                followInternalLinks = false;
+                continue;
             }
 
             if (arg.Equals(ARG_OUTPUT))
@@ -60,13 +57,22 @@ public static class ArgumentParser
 
             if (arg.Equals(ARG_VERBOSE) || arg.Equals(ARG_VERBOSE_SHORT))
             {
-                detailledLogMessages = true;
+                detailedLogMessages = true;
+                continue;
+            }
+
+            if (arg.Equals(ARG_JSON))
+            {
+                json = true;
                 continue;
             }
 
             throw new ArgumentParseException($"Invalid argument {arg} found!");
         }
 
-        return new AppSettings(baseUrl, followInternalLinks, outputPath, detailledLogMessages);
+        if (json && string.IsNullOrEmpty(outputPath))
+            throw new ArgumentParseException($"Argument {ARG_JSON} requires {ARG_OUTPUT} to be set!");
+
+        return new AppSettings(baseUrl, followInternalLinks, outputPath, detailedLogMessages, json);
     }
 }
