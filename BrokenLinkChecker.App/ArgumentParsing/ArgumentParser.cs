@@ -1,4 +1,7 @@
-﻿using BrokenLinkChecker.App.Models;
+﻿using System.Collections.Generic;
+using System.Linq;
+
+using BrokenLinkChecker.App.Models;
 
 namespace BrokenLinkChecker.App.ArgumentParsing;
 public static class ArgumentParser
@@ -8,6 +11,7 @@ public static class ArgumentParser
     private const string ARG_VERBOSE = "--verbose";
     private const string ARG_VERBOSE_SHORT = "-v";
     private const string ARG_JSON = "--json";
+    private const string ARG_EXCLUDE_STATUS_CODES = "--exclude-status-codes";
 
     public static AppSettings Parse(string[] args)
     {
@@ -16,6 +20,7 @@ public static class ArgumentParser
         var outputPath = "";
         var detailedLogMessages = false;
         var json = false;
+        var excludeStatusCodes = Enumerable.Empty<int>();
 
         if (args.Length == 0)
             throw new ArgumentParseException("Provide a website to check!");
@@ -33,6 +38,20 @@ public static class ArgumentParser
 
                 baseUrl = arg;
                 continue;
+            }
+
+            if (arg.Equals(ARG_EXCLUDE_STATUS_CODES))
+            {
+                if (val != null)
+                {
+                    excludeStatusCodes = val.Split(",").Select(int.Parse);
+                    i++;
+                    continue;
+                }
+                else
+                {
+                    throw new ArgumentParseException("A list of HTTP status codes was expected but not found!");
+                }
             }
 
             if (arg.Equals(ARG_NO_FOLLOW_INTERNAL_LINKS))
@@ -73,6 +92,6 @@ public static class ArgumentParser
         if (json && string.IsNullOrEmpty(outputPath))
             throw new ArgumentParseException($"Argument {ARG_JSON} requires {ARG_OUTPUT} to be set!");
 
-        return new AppSettings(baseUrl, followInternalLinks, outputPath, detailedLogMessages, json);
+        return new AppSettings(baseUrl, followInternalLinks, outputPath, detailedLogMessages, json, excludeStatusCodes);
     }
 }

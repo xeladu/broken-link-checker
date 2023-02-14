@@ -67,7 +67,7 @@ internal static class Program
         {
             Console.WriteLine(
                 """
-                usage: blc <url> [--verbose | -v] [--no-follow-internal-links] [--output <path>] [--json]
+                usage: blc <url> [--verbose | -v] [--no-follow-internal-links] [--output <path>] [--json] [--exclude-status-codes 403,503]
 
                     url        
                     A valid http(s) web url to check
@@ -83,6 +83,9 @@ internal static class Program
 
                     --json
                     Program output will be stored in JSON format (requires --output)
+
+                    --exclude-status-code
+                    Expects a list of comma-separated HTTP status codes that will be treated as online
 
                 """);
 

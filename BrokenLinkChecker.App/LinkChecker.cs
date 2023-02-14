@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -10,6 +11,13 @@ namespace BrokenLinkChecker.App;
 
 internal class LinkChecker : ProgressReporter
 {
+    private readonly AppSettings _settings;
+
+    public LinkChecker(AppSettings settings)
+    {
+        _settings = settings;
+    }
+
     public async Task CheckAsync(Link link)
     {
         var client = new HttpClient
@@ -31,7 +39,7 @@ internal class LinkChecker : ProgressReporter
             {
                 link.Status = new LinkCheckResult
                 {
-                    Result = response.StatusCode == HttpStatusCode.OK ? CheckResult.Online : CheckResult.Broken,
+                    Result = IsLinkOnline(response.StatusCode) ? CheckResult.Online : CheckResult.Broken,
                     StatusCode = response.StatusCode,
                     Error = response.ReasonPhrase ?? ""
                 };
@@ -55,5 +63,10 @@ internal class LinkChecker : ProgressReporter
         {
             ReportProgressVerbose($"{link}");
         }
+    }
+
+    private bool IsLinkOnline(HttpStatusCode code)
+    {
+        return code == HttpStatusCode.OK || _settings.ExcludeStatusCodes.ToList().Contains((int)code);
     }
 }
