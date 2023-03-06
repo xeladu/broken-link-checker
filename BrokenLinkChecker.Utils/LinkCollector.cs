@@ -1,33 +1,21 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
-using BrokenLinkChecker.App.Models;
-using BrokenLinkChecker.App.ProgressReporting;
+﻿using BrokenLinkChecker.Utils.Models;
+using BrokenLinkChecker.Utils.ProgressReporting;
 
 using HtmlAgilityPack;
 
-using Microsoft.Extensions.DependencyInjection;
+namespace BrokenLinkChecker.Utils;
 
-namespace BrokenLinkChecker.App;
-
-internal class LinkCollector : ProgressReporter
+public class LinkCollector : ProgressReporter
 {
-    private readonly AppSettings _appSettings;
-    private readonly string _host;
+    private string _host = "";
 
     public List<Link> Links { get; } = new List<Link>();
 
-    public LinkCollector(IServiceProvider services)
+    public async Task CollectAsync(AppSettings settings)
     {
-        _appSettings = services.GetService<AppSettings>() ?? throw new ArgumentNullException(nameof(_appSettings));
-        _host = new Uri(_appSettings.BaseUrl).Host;
-    }
+        _host = new Uri(settings.BaseUrl).Host;
 
-    public async Task CollectAsync()
-    {
-        var initialUri = _appSettings.BaseUrl.EndsWith("/") ? _appSettings.BaseUrl.Substring(0, _appSettings.BaseUrl.Length - 1) : _appSettings.BaseUrl;
+        var initialUri = settings.BaseUrl.EndsWith("/") ? settings.BaseUrl.Substring(0, settings.BaseUrl.Length - 1) : settings.BaseUrl;
         Links.Add(new Link { IsExternal = false, Target = initialUri, Sources = new List<string> { initialUri } });
 
         var linkCount = Links.Count;
@@ -51,7 +39,7 @@ internal class LinkCollector : ProgressReporter
 
                     // By not increasing the counter, we can prevent additional links from being followed.
                     // Only the link of the base url are used.
-                    if (_appSettings.FollowInternalLinks)
+                    if (settings.FollowInternalLinks)
                     {
                         linkCount++;
                     }

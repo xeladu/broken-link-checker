@@ -1,24 +1,13 @@
-﻿using System;
-using System.Linq;
-using System.Net;
-using System.Net.Http;
-using System.Threading.Tasks;
+﻿using System.Net;
 
-using BrokenLinkChecker.App.Models;
-using BrokenLinkChecker.App.ProgressReporting;
+using BrokenLinkChecker.Utils.Models;
+using BrokenLinkChecker.Utils.ProgressReporting;
 
-namespace BrokenLinkChecker.App;
+namespace BrokenLinkChecker.Utils;
 
-internal class LinkChecker : ProgressReporter
+public class LinkChecker : ProgressReporter
 {
-    private readonly AppSettings _settings;
-
-    public LinkChecker(AppSettings settings)
-    {
-        _settings = settings;
-    }
-
-    public async Task CheckAsync(Link link)
+    public async Task CheckAsync(Link link, IEnumerable<int> excludedStatusCodes)
     {
         var client = new HttpClient
         {
@@ -29,7 +18,7 @@ internal class LinkChecker : ProgressReporter
 
         var message = new HttpRequestMessage
         {
-            Method = HttpMethod.Get,
+            Method = HttpMethod.Head,
             RequestUri = new Uri(link.Target)
         };
 
@@ -39,7 +28,7 @@ internal class LinkChecker : ProgressReporter
             {
                 link.Status = new LinkCheckResult
                 {
-                    Result = IsLinkOnline(response.StatusCode) ? CheckResult.Online : CheckResult.Broken,
+                    Result = IsLinkOnline(response.StatusCode, excludedStatusCodes) ? CheckResult.Online : CheckResult.Broken,
                     StatusCode = response.StatusCode,
                     Error = response.ReasonPhrase ?? ""
                 };
@@ -65,8 +54,8 @@ internal class LinkChecker : ProgressReporter
         }
     }
 
-    private bool IsLinkOnline(HttpStatusCode code)
+    private static bool IsLinkOnline(HttpStatusCode code, IEnumerable<int> excludeStatusCodes)
     {
-        return code == HttpStatusCode.OK || _settings.ExcludeStatusCodes.ToList().Contains((int)code);
+        return code == HttpStatusCode.OK || excludeStatusCodes.ToList().Contains((int)code);
     }
 }

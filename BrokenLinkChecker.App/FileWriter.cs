@@ -2,7 +2,7 @@
 using System.Text;
 using System.Threading.Tasks;
 
-using BrokenLinkChecker.App.Models;
+using BrokenLinkChecker.Utils.Models;
 
 using Newtonsoft.Json;
 

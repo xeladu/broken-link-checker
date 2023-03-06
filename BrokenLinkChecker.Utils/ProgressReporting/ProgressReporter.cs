@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace BrokenLinkChecker.App.ProgressReporting;
+﻿namespace BrokenLinkChecker.Utils.ProgressReporting;
 
 public abstract class ProgressReporter
 {

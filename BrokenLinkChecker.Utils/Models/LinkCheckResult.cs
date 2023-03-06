@@ -1,7 +1,7 @@
 ﻿using System.Net;
 
-namespace BrokenLinkChecker.App.Models;
-internal class LinkCheckResult
+namespace BrokenLinkChecker.Utils.Models;
+public class LinkCheckResult
 {
     public required CheckResult Result { get; init; }
 

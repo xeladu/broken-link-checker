@@ -1,8 +1,6 @@
-﻿using System.Collections.Generic;
+﻿namespace BrokenLinkChecker.Utils.Models;
 
-namespace BrokenLinkChecker.App.Models;
-
-internal class Link
+public class Link
 {
     public List<string> Sources { get; set; } = new List<string>();
 

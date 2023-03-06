@@ -2,7 +2,8 @@
 using System.Threading.Tasks;
 
 using BrokenLinkChecker.App.ArgumentParsing;
-using BrokenLinkChecker.App.Models;
+using BrokenLinkChecker.Utils;
+using BrokenLinkChecker.Utils.Models;
 
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -42,11 +43,6 @@ internal static class Program
 
             if (!string.IsNullOrEmpty(settings.OutputPath))
             {
-                if (settings.Json)
-                {
-
-                }
-
                 var fileWriter = host.Services.GetService<FileWriter>();
                 if (fileWriter != null)
                 {
@@ -67,7 +63,7 @@ internal static class Program
         {
             Console.WriteLine(
                 """
-                usage: blc <url> [--verbose | -v] [--no-follow-internal-links] [--output <path>] [--json] [--exclude-status-codes 403,503]
+                usage: blc <url> [--verbose | -v] [--follow-internal-links] [--output <path>] [--json] [--exclude-status-codes 403,503]
 
                     url        
                     A valid http(s) web url to check
@@ -75,8 +71,8 @@ internal static class Program
                     --verbose | -v
                     Outputs detailed program information
 
-                    --no-follow-internal-links
-                    Indicates that sublinks of the url with the same host should not be checked
+                    --follow-internal-links
+                    Indicates that sublinks of the url with the same host should not be checked (default: off)
 
                     --output
                     Specify a folder that will contain the program's output in a text file blc.txt

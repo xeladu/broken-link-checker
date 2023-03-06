@@ -3,8 +3,9 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 
-using BrokenLinkChecker.App.Models;
-using BrokenLinkChecker.App.ProgressReporting;
+using BrokenLinkChecker.Utils;
+using BrokenLinkChecker.Utils.Models;
+using BrokenLinkChecker.Utils.ProgressReporting;
 
 using Microsoft.Extensions.DependencyInjection;
 
@@ -35,11 +36,11 @@ internal class Runner : ProgressReporter
 
         ReportProgress($"Collecting links of {_appSettings.BaseUrl} ...");
 
-        await _linkCollector.CollectAsync();
+        await _linkCollector.CollectAsync(_appSettings);
 
         ReportProgress($"Checking availability of {_linkCollector.Links.Count} links ...");
 
-        await Parallel.ForEachAsync(_linkCollector.Links, async (link, _) => await _linkChecker.CheckAsync(link));
+        await Parallel.ForEachAsync(_linkCollector.Links, async (link, _) => await _linkChecker.CheckAsync(link, _appSettings.ExcludeStatusCodes));
 
         _result.TotalLinkCount = _linkCollector.Links.Count();
         _result.BrokenLinkCount = _linkCollector.Links.Count(x => x.Status?.Result == CheckResult.Broken);

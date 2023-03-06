@@ -7,3 +7,7 @@
 /BrokenLinkChecker.App/obj
 /BrokenLinkChecker.App.Tests/bin/Debug/net7.0
 /BrokenLinkChecker.App.Tests/obj
+/BrokenLinkChecker.Api/bin/Debug/net7.0
+/BrokenLinkChecker.Api/obj
+/BrokenLinkChecker.Utils/bin/Debug/net7.0
+/BrokenLinkChecker.Utils/obj

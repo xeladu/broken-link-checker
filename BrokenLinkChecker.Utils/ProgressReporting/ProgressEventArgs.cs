@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace BrokenLinkChecker.App.ProgressReporting;
+namespace BrokenLinkChecker.Utils.ProgressReporting;
 
 public class ProgressEventArgs : EventArgs
 {

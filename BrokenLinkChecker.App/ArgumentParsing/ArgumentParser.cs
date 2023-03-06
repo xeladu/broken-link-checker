@@ -1,12 +1,11 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 
-using BrokenLinkChecker.App.Models;
+using BrokenLinkChecker.Utils.Models;
 
 namespace BrokenLinkChecker.App.ArgumentParsing;
 public static class ArgumentParser
 {
-    private const string ARG_NO_FOLLOW_INTERNAL_LINKS = "--no-follow-internal-links";
+    private const string ARG_FOLLOW_INTERNAL_LINKS = "--follow-internal-links";
     private const string ARG_OUTPUT = "--output";
     private const string ARG_VERBOSE = "--verbose";
     private const string ARG_VERBOSE_SHORT = "-v";
@@ -16,7 +15,7 @@ public static class ArgumentParser
     public static AppSettings Parse(string[] args)
     {
         var baseUrl = "";
-        var followInternalLinks = true;
+        var followInternalLinks = false;
         var outputPath = "";
         var detailedLogMessages = false;
         var json = false;
@@ -54,9 +53,9 @@ public static class ArgumentParser
                 }
             }
 
-            if (arg.Equals(ARG_NO_FOLLOW_INTERNAL_LINKS))
+            if (arg.Equals(ARG_FOLLOW_INTERNAL_LINKS))
             {
-                followInternalLinks = false;
+                followInternalLinks = true;
                 continue;
             }
 

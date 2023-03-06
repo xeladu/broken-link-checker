@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace BrokenLinkChecker.App.Models;
+﻿namespace BrokenLinkChecker.Utils.Models;
 
 public class AppSettings
 {
@@ -18,6 +16,16 @@ public class AppSettings
         OutputPath = outputPath;
         DetailedLogMessages = detailedLogMessages;
         Json = json;
+        ExcludeStatusCodes = excludeStatusCodes;
+    }
+
+    public AppSettings(string baseUrl, bool followInternalLinks, IEnumerable<int> excludeStatusCodes)
+    {
+        BaseUrl = baseUrl;
+        FollowInternalLinks = followInternalLinks;
+        OutputPath = string.Empty;
+        DetailedLogMessages = false;
+        Json = false;
         ExcludeStatusCodes = excludeStatusCodes;
     }
 }
